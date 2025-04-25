@@ -1,11 +1,13 @@
-import { test } from '@playwright/test';
-import { faker } from '@faker-js/faker';
+import { test } from "@playwright/test";
+import { faker } from "@faker-js/faker";
+import { AddCustomerPage } from "../../../src/pages/manager/AddCustomerPage";
+import { CustomersListPage } from "../../../src/pages/manager/CustomersListPage";
 
 let firstName;
 let lastName;
-let postalCode; 
+let postalCode;
 
-test.beforeEach( async ({ page }) => {
+test.beforeEach(async ({ page }) => {
   /* 
   Pre-conditons:
   1. Open Add Customer page
@@ -14,16 +16,21 @@ test.beforeEach( async ({ page }) => {
   4. Fill the Postal Code.
   5. Click [Add Customer].
   */
+  const addCustomerPage = new AddCustomerPage(page);
 
   firstName = faker.person.firstName();
   lastName = faker.person.lastName();
-  postalCode = faker.location.zipCode(); 
+  postalCode = faker.location.zipCode();
 
-
+  await addCustomerPage.open();
+  await addCustomerPage.fillFirstName(firstName);
+  await addCustomerPage.fillLastName(lastName);
+  await addCustomerPage.fillPostCode(postalCode);
+  await addCustomerPage.clickAddcustomerButton();
 });
 
-test('Assert manager can search customer by Last Name', async ({ page }) => {
-/* 
+test("Assert manager can search customer by Last Name", async ({ page }) => {
+  /* 
 Test:
 1. Open Customers page
 2. Fill the lastName to the search field
@@ -31,5 +38,10 @@ Test:
 4. Assert no other rows is present in the table.
 */
 
+const customerListPage = new CustomersListPage(page)
 
+await customerListPage.open();
+await customerListPage.searchCustomer(lastName);
+await customerListPage.assertLastRowLastName(lastName)
+await customerListPage.assertOnlyOneCustomerInList();
 });
